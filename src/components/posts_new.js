@@ -1,0 +1,95 @@
+import React, { Component, PropTypes } from 'react';
+import { reduxForm } from 'redux-form';
+import { Link } from "react-router"
+import { createPost } from '../actions/index';
+import HeaderInfo from '../components/header';
+import AboutMe from '../components/about';
+
+class PostsNew extends Component {
+  static contextTypes = {
+    router: PropTypes.object
+  };
+
+  onSubmit(props) {
+    this.props.createPost(props)
+      .then(() => {
+        // blog post has been created, navigate the user to the index
+        // We navigate by calling this.context.router.push with the
+        // new path to navigate to.
+        this.context.router.push('/');
+      });
+  }
+
+  render() {
+    const { fields: { title, categories, content }, handleSubmit } = this.props;
+    return (
+      
+      <form onSubmit={handleSubmit(this.onSubmit.bind(this))}>
+         <div>
+        <div>
+          <HeaderInfo />
+        </div>
+        <ul>
+        <Link to="/">
+        <button  type="button"className="firstb" >關於我</button>
+         </Link>
+         <Link to="/connect">
+        <button type="button"className ="firstb ">聯絡我</button>
+        </Link>
+        <button type="button"className ="firstb ">留言板</button>
+         </ul>
+      </div>
+        <h3>留言給我</h3>
+        <div className="form-group">
+          <label>標題</label>
+          <input type="text" className="form-control" {...title}/>
+          <div className="text-help">
+            {title.touched ? title.error : ''}
+          </div>
+        </div>
+        <div className="form-group">
+          <label>暱稱</label>
+          <input type="text" className="form-control" {...categories}/>
+            <div className="text-help">
+              {categories.touched ? categories.error : ''}
+            </div>
+        </div>
+        <div className="form-group">
+          <label>內容</label>
+          <textarea className="form-control" {...content}/>
+            <div className="text-help">
+              {content.touched ? content.error : ''}
+            </div>
+        </div>
+        <button type="submit" className="btn btn-primary">發送</button>
+        <Link to="/" className="btn btn-danger">取消</Link>
+      </form>
+    );
+  }
+}
+
+function validate(values) {
+  const errors = {};
+
+  if (!values.title) {
+    errors.title = 'Enter a username';
+  }
+  if (!values.categories) {
+    errors.categories = 'Enter categories';
+  }
+  if(!values.content) {
+    errors.content = 'Enter some content';
+  }
+
+  return errors;
+}
+
+function mapStateToProps(state) {
+  return { posts: state.posts.all };
+}
+
+export default reduxForm({
+  form: 'PostsNewForm',
+  fields: ['title', 'categories', 'content'],
+  validate
+}, null, { createPost })(PostsNew);
